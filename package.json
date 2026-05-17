@@ -1,6 +1,6 @@
 {
   "name": "@fastaai/lenx-mcp",
-  "version": "0.1.0",
+  "version": "0.0.1",
   "description": "MCP server bridging AI agents to the Lenx.ai social media monitoring API",
   "type": "module",
   "bin": {
@@ -36,6 +36,11 @@
     "type": "git",
     "url": "git+https://github.com/thinkcol/lenx-mcp.git"
   },
-  "keywords": ["mcp", "lenx", "social-media", "monitoring"],
+  "keywords": [
+    "mcp",
+    "lenx",
+    "social-media",
+    "monitoring"
+  ],
   "license": "MIT"
 }
