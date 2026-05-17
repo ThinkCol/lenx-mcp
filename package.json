@@ -1,0 +1,41 @@
+{
+  "name": "@fastaai/lenx-mcp",
+  "version": "0.1.0",
+  "description": "MCP server bridging AI agents to the Lenx.ai social media monitoring API",
+  "type": "module",
+  "bin": {
+    "lenx-mcp": "dist/index.js"
+  },
+  "files": [
+    "dist/",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc && node scripts/postbuild.js",
+    "watch": "tsc --watch",
+    "prepublishOnly": "npm run build",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "zod": "^3.23.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.0",
+    "vitest": "^2.1.0",
+    "@types/node": "^20.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/thinkcol/lenx-mcp.git"
+  },
+  "keywords": ["mcp", "lenx", "social-media", "monitoring"],
+  "license": "MIT"
+}
