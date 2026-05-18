@@ -1,6 +1,6 @@
 {
   "name": "@fastaai/lenx-mcp",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "MCP server bridging AI agents to the Lenx.ai social media monitoring API",
   "type": "module",
   "bin": {
@@ -25,9 +25,9 @@
     "zod": "^4.0.0"
   },
   "devDependencies": {
+    "@types/node": "^20.0.0",
     "typescript": "^5.5.0",
-    "vitest": "^2.1.0",
-    "@types/node": "^20.0.0"
+    "vitest": "^2.1.0"
   },
   "publishConfig": {
     "access": "public"
