@@ -1,5 +1,5 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { z } from "zod";
+import { z } from "zod/v3";
 import { LenxClient } from "../client.js";
 import { ListTasksResponse } from "../types.js";
 

@@ -14,7 +14,7 @@ export interface SearchQuery {
 }
 
 /* ── Timestamp Schema (milliseconds) ── */
-import { z } from "zod";
+import { z } from "zod/v3";
 
 export const TimestampMs = z.number().positive().refine(
   (val) => val > 1000000000000,

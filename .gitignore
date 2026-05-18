@@ -3,3 +3,9 @@ dist/
 coverage/
 .env
 *.tgz
+*.bak
+*.tsbuildinfo
+*.log
+*.orig
+*.tmp
+*~
