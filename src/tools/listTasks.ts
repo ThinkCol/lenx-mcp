@@ -4,12 +4,19 @@ import { LenxClient } from "../client.js";
 import { ListTasksResponse } from "../types.js";
 
 export function registerListTasks(server: McpServer, client: LenxClient): void {
-  server.tool(
+  server.registerTool(
     "lenx_list_tasks",
-    "List monitoring tasks accessible to the authenticated user, with pagination support.",
     {
-      page: z.number().int().positive().optional().describe("Page number (default: 1)"),
-      size: z.number().int().positive().max(20).optional().describe("Items per page (default: 10, max: 20)"),
+      description: "List monitoring tasks accessible to the authenticated user, with pagination support.",
+      inputSchema: {
+        page: z.number().int().positive().optional().describe("Page number (default: 1)"),
+        size: z.number().int().positive().max(20).optional().describe("Items per page (default: 10, max: 20)"),
+    },
+      annotations: {
+        readOnlyHint: true,
+        idempotentHint: true,
+        destructiveHint: false,
+      },
     },
     async ({ page, size }) => {
       try {

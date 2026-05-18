@@ -14,22 +14,29 @@ const exportColumns = [
 ] as const;
 
 export function registerExportTaskData(server: McpServer, client: LenxClient): void {
-  server.tool(
+  server.registerTool(
     "lenx_export_task_data",
-    "Request a CSV or XLSX export of task post data. Results are sent to the specified email address.",
     {
-      task_ids: z.array(z.coerce.number().int().positive()).min(1).describe("Array of task IDs to export (strings are auto-converted to numbers)"),
-      unix_start: TimestampMs.describe("Start of export time range in MILLISECONDS (13-digit integer). NOT seconds."),
-      unix_end: TimestampMs.describe("End of export time range in MILLISECONDS (13-digit integer). NOT seconds."),
-      columns: z.array(z.enum(exportColumns)).min(1).describe("Columns to include in the export file"),
-      file_format: z.enum(["csv", "xlsx"]).describe("Export file format: csv or xlsx"),
-      email: z.string().email().max(255).describe("Email address to send the export to"),
-      is_comment: z.boolean().optional().describe("Include comments in export"),
-      dedupe: z.boolean().optional().describe("Deduplicate posts in export"),
-      limit: z.number().int().positive().optional().describe("Maximum number of posts to export"),
-      recipients: z.array(z.string().email()).optional().describe("Additional email recipients"),
-      email_subject: z.string().max(200).optional().describe("Custom email subject line"),
-      timezone: z.string().optional().describe("Timezone for date formatting in export"),
+      description: "Request a CSV or XLSX export of task post data. Results are sent to the specified email address.",
+      inputSchema: {
+        task_ids: z.array(z.coerce.number().int().positive()).min(1).describe("Array of task IDs to export (strings are auto-converted to numbers)"),
+        unix_start: TimestampMs.describe("Start of export time range in MILLISECONDS (13-digit integer). NOT seconds."),
+        unix_end: TimestampMs.describe("End of export time range in MILLISECONDS (13-digit integer). NOT seconds."),
+        columns: z.array(z.enum(exportColumns)).min(1).describe("Columns to include in the export file"),
+        file_format: z.enum(["csv", "xlsx"]).describe("Export file format: csv or xlsx"),
+        email: z.string().email().max(255).describe("Email address to send the export to"),
+        is_comment: z.boolean().optional().describe("Include comments in export"),
+        dedupe: z.boolean().optional().describe("Deduplicate posts in export"),
+        limit: z.number().int().positive().optional().describe("Maximum number of posts to export"),
+        recipients: z.array(z.string().email()).optional().describe("Additional email recipients"),
+        email_subject: z.string().max(200).optional().describe("Custom email subject line"),
+        timezone: z.string().optional().describe("Timezone for date formatting in export"),
+      },
+      annotations: {
+        readOnlyHint: false,
+        idempotentHint: false,
+        destructiveHint: false,
+      },
     },
     async (params) => {
       try {

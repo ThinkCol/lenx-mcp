@@ -4,11 +4,18 @@ import { LenxClient } from "../client.js";
 import { GetTaskResponse } from "../types.js";
 
 export function registerGetTask(server: McpServer, client: LenxClient): void {
-  server.tool(
+  server.registerTool(
     "lenx_get_task",
-    "Retrieve configuration and metadata for a single monitoring task by ID.",
     {
-      task_id: z.coerce.number().int().positive().describe("Task ID"),
+      description: "Retrieve configuration and metadata for a single monitoring task by ID.",
+      inputSchema: {
+        task_id: z.coerce.number().int().positive().describe("Task ID"),
+    },
+      annotations: {
+        readOnlyHint: true,
+        idempotentHint: true,
+        destructiveHint: false,
+      },
     },
     async ({ task_id }) => {
       try {

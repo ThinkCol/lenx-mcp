@@ -1,5 +1,6 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
+import { createRequire } from "module";
 import { LenxClient } from "./client.js";
 import { LenxConfig } from "./config.js";
 import { registerListTasks } from "./tools/listTasks.js";
@@ -10,11 +11,14 @@ import { registerDeleteTask } from "./tools/deleteTask.js";
 import { registerGetTaskData } from "./tools/getTaskData.js";
 import { registerExportTaskData } from "./tools/exportTaskData.js";
 
+const require = createRequire(import.meta.url);
+const { version } = require("../package.json");
+
 export async function createAndRunServer(config: LenxConfig): Promise<void> {
   const client = new LenxClient(config);
 
   const server = new McpServer(
-    { name: "lenx-mcp", version: "0.1.0" },
+    { name: "lenx-mcp", version },
     {
       instructions:
         "Always list tasks first to find task IDs before using other tools.\n" +

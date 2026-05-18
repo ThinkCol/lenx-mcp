@@ -4,11 +4,18 @@ import { LenxClient } from "../client.js";
 import { DeleteTaskResponse } from "../types.js";
 
 export function registerDeleteTask(server: McpServer, client: LenxClient): void {
-  server.tool(
+  server.registerTool(
     "lenx_delete_task",
-    "Delete a monitoring task. Only the task owner can perform this operation.",
     {
-      task_id: z.coerce.number().int().positive().describe("Task ID to delete"),
+      description: "Delete a monitoring task. Only the task owner can perform this operation.",
+      inputSchema: {
+        task_id: z.coerce.number().int().positive().describe("Task ID to delete"),
+      },
+      annotations: {
+        readOnlyHint: false,
+        idempotentHint: true,
+        destructiveHint: true,
+      },
     },
     async ({ task_id }) => {
       try {

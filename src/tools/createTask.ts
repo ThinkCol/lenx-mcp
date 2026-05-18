@@ -18,23 +18,30 @@ const searchQuerySchema = z.object({
 });
 
 export function registerCreateTask(server: McpServer, client: LenxClient): void {
-  server.tool(
+  server.registerTool(
     "lenx_create_task",
-    "Create a new monitoring task (live or adhoc). Live tasks run continuously; adhoc tasks require a date_range.",
     {
-      task_type: z.enum(["live", "adhoc"]).describe("Task type: 'live' runs continuously, 'adhoc' requires date_range"),
-      task_name: z.string().min(1).max(50).describe("Task name (1-50 characters)"),
-      language: z.enum(["zh-t", "zh-s", "en"]).describe("Language: zh-t (Traditional Chinese), zh-s (Simplified Chinese), en (English)"),
-      date_range: z.object({
-        from: TimestampMs.describe("Start unix timestamp in MILLISECONDS (13-digit integer). NOT seconds."),
-        to: TimestampMs.describe("End unix timestamp in MILLISECONDS (13-digit integer). NOT seconds."),
-      }).optional().describe("Required for adhoc tasks: time range for data collection"),
-      search_query: searchQuerySchema.describe(
-        "Search query configuration. Example query_layer with nested grouped keywords:\n" +
-        '[{"in": ["brand_name", "product_name"], "ex": ["competitor_name"]}]\n' +
-        "Nested OR-group form:\n" +
-        '[{"in": [["brand_name", "brand_alias"], ["product_series_a", "product_series_b"]], "ex": [["competitor_a", "competitor_b"]]}]'
-      ),
+      description: "Create a new monitoring task (live or adhoc). Live tasks run continuously; adhoc tasks require a date_range.",
+      inputSchema: {
+        task_type: z.enum(["live", "adhoc"]).describe("Task type: 'live' runs continuously, 'adhoc' requires date_range"),
+        task_name: z.string().min(1).max(50).describe("Task name (1-50 characters)"),
+        language: z.enum(["zh-t", "zh-s", "en"]).describe("Language: zh-t (Traditional Chinese), zh-s (Simplified Chinese), en (English)"),
+        date_range: z.object({
+          from: TimestampMs.describe("Start unix timestamp in MILLISECONDS (13-digit integer). NOT seconds."),
+          to: TimestampMs.describe("End unix timestamp in MILLISECONDS (13-digit integer). NOT seconds."),
+        }).optional().describe("Required for adhoc tasks: time range for data collection"),
+        search_query: searchQuerySchema.describe(
+          "Search query configuration. Example query_layer with nested grouped keywords:\n" +
+          '[{"in": ["brand_name", "product_name"], "ex": ["competitor_name"]}]\n' +
+          "Nested OR-group form:\n" +
+          '[{"in": [["brand_name", "brand_alias"], ["product_series_a", "product_series_b"]], "ex": [["competitor_a", "competitor_b"]]}]'
+        ),
+    },
+      annotations: {
+        readOnlyHint: false,
+        idempotentHint: false,
+        destructiveHint: false,
+      },
     },
     async (params) => {
       try {

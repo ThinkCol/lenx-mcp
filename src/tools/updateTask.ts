@@ -18,16 +18,23 @@ const updateSearchQuerySchema = z.object({
 });
 
 export function registerUpdateTask(server: McpServer, client: LenxClient): void {
-  server.tool(
+  server.registerTool(
     "lenx_update_task",
-    "Update an existing task's name and/or search query configuration. At least one field is required.",
     {
-      task_id: z.coerce.number().int().positive().describe("Task ID to update"),
-      task_name: z.string().min(1).max(50).optional().describe("New task name (1-50 characters)"),
-      search_query: updateSearchQuerySchema.optional().describe(
-        "Partial search query update. Provide only the fields to change. Example:\n" +
-        '{"query_layer": [{"in": ["new_keyword"], "ex": []}]}'
-      ),
+      description: "Update an existing task's name and/or search query configuration. At least one field is required.",
+      inputSchema: {
+        task_id: z.coerce.number().int().positive().describe("Task ID to update"),
+        task_name: z.string().min(1).max(50).optional().describe("New task name (1-50 characters)"),
+        search_query: updateSearchQuerySchema.optional().describe(
+          "Partial search query update. Provide only the fields to change. Example:\n" +
+          '{"query_layer": [{"in": ["new_keyword"], "ex": []}]}'
+        ),
+      },
+      annotations: {
+        readOnlyHint: false,
+        idempotentHint: true,
+        destructiveHint: false,
+      },
     },
     async (params) => {
       try {
