@@ -13,10 +13,21 @@ export interface SearchQuery {
   exclude_channel_links?: string[];
 }
 
+/* ── Timestamp Schema (milliseconds) ── */
+import { z } from "zod";
+
+export const TimestampMs = z.number().positive().refine(
+  (val) => val > 1000000000000,
+  { message: "Timestamp must be in milliseconds (13-digit integer), not seconds. Multiply seconds by 1000." }
+);
+export type TimestampMs = z.infer<typeof TimestampMs>;
+
 /* ── Date Range ── */
 export interface DateRange {
-  from: number;
-  to: number;
+  /** Unix timestamp in MILLISECONDS (13-digit integer), NOT seconds */
+  from: TimestampMs;
+  /** Unix timestamp in MILLISECONDS (13-digit integer), NOT seconds */
+  to: TimestampMs;
 }
 
 /* ── Core Entities ── */
@@ -34,6 +45,7 @@ export interface Post {
   thread_title: string;
   post_message: string;
   post_timestamp: string;
+  /** Unix timestamp in MILLISECONDS (13-digit integer), NOT seconds */
   unix_timestamp: number;
   author_name: string;
   author_id?: string;
@@ -95,8 +107,10 @@ export interface UpdateTaskRequest {
 
 export interface ExportTaskRequest {
   task_ids?: number[];
-  unix_start: number;
-  unix_end: number;
+  /** Unix timestamp in MILLISECONDS (13-digit integer), NOT seconds */
+  unix_start: TimestampMs;
+  /** Unix timestamp in MILLISECONDS (13-digit integer), NOT seconds */
+  unix_end: TimestampMs;
   columns: string[];
   file_format: "csv" | "xlsx";
   email: string;
@@ -137,10 +151,13 @@ export interface DeleteTaskResponse {
 }
 
 export interface GetTaskDataParams {
-  from: number;
-  to: number;
+  /** Start unix timestamp in MILLISECONDS (13-digit integer), inclusive. NOT seconds. */
+  from: TimestampMs;
+  /** End unix timestamp in MILLISECONDS (13-digit integer), inclusive. NOT seconds. */
+  to: TimestampMs;
   size: number;
-  search_after?: number;
+  /** Cursor for pagination: pass the last post's unix_timestamp in MILLISECONDS (13-digit integer). NOT seconds. */
+  search_after?: TimestampMs;
 }
 
 export interface GetTaskDataResponse {

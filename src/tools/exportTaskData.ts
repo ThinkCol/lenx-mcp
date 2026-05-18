@@ -1,7 +1,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { LenxClient } from "../client.js";
-import { ExportTaskResponse } from "../types.js";
+import { ExportTaskResponse, TimestampMs } from "../types.js";
 
 const exportColumns = [
   "medium", "site", "country", "lang_abbr", "thread_title",
@@ -19,8 +19,8 @@ export function registerExportTaskData(server: McpServer, client: LenxClient): v
     "Request a CSV or XLSX export of task post data. Results are sent to the specified email address.",
     {
       task_ids: z.array(z.coerce.number().int().positive()).min(1).describe("Array of task IDs to export (strings are auto-converted to numbers)"),
-      unix_start: z.number().int().min(0).describe("Start of export time range (unix timestamp)"),
-      unix_end: z.number().int().min(0).describe("End of export time range (unix timestamp)"),
+      unix_start: TimestampMs.describe("Start of export time range in MILLISECONDS (13-digit integer). NOT seconds."),
+      unix_end: TimestampMs.describe("End of export time range in MILLISECONDS (13-digit integer). NOT seconds."),
       columns: z.array(z.enum(exportColumns)).min(1).describe("Columns to include in the export file"),
       file_format: z.enum(["csv", "xlsx"]).describe("Export file format: csv or xlsx"),
       email: z.string().email().max(255).describe("Email address to send the export to"),

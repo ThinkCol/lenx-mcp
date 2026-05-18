@@ -47,7 +47,7 @@ describe("lenx_create_task", () => {
       task_type: "adhoc",
       task_name: "Brand Monitor",
       language: "en",
-      date_range: { from: 1740096000, to: 1740787200 },
+      date_range: { from: 1740096000000, to: 1740787200000 },
       search_query: {
         query_layer: [{ in: ["brand_name", "product_name"], ex: ["competitor_name"] }],
         region: "USA",

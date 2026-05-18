@@ -42,8 +42,8 @@ describe("lenx_export_task_data", () => {
     const handler = getToolHandler(server, "lenx_export_task_data") as (args: ExportTaskDataArgs, extra: { signal: AbortSignal }) => HandlerResult;
     const result = await handler({
       task_ids: [1, 2],
-      unix_start: 1740096000,
-      unix_end: 1740787200,
+      unix_start: 1740096000000,
+      unix_end: 1740787200000,
       columns: ["medium", "site"],
       file_format: "csv",
       email: "user@example.com",
@@ -61,8 +61,8 @@ describe("lenx_export_task_data", () => {
     const handler = getToolHandler(server, "lenx_export_task_data") as (args: ExportTaskDataArgs, extra: { signal: AbortSignal }) => HandlerResult;
     await handler({
       task_ids: [1, 2, 3],
-      unix_start: 100,
-      unix_end: 200,
+      unix_start: 100000,
+      unix_end: 200000,
       columns: ["medium"],
       file_format: "xlsx",
       email: "a@b.com",
@@ -81,8 +81,8 @@ describe("lenx_export_task_data", () => {
     const handler = getToolHandler(server, "lenx_export_task_data") as (args: ExportTaskDataArgs, extra: { signal: AbortSignal }) => HandlerResult;
     const result = await handler({
       task_ids: [1],
-      unix_start: 100,
-      unix_end: 200,
+      unix_start: 100000,
+      unix_end: 200000,
       columns: ["medium"],
       file_format: "csv",
       email: "a@b.com",

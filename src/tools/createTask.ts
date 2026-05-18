@@ -1,7 +1,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { LenxClient } from "../client.js";
-import { CreateTaskResponse } from "../types.js";
+import { CreateTaskResponse, TimestampMs } from "../types.js";
 
 const queryLayerItemSchema = z.object({
   in: z.array(z.union([z.string(), z.array(z.string())])),
@@ -26,8 +26,8 @@ export function registerCreateTask(server: McpServer, client: LenxClient): void 
       task_name: z.string().min(1).max(50).describe("Task name (1-50 characters)"),
       language: z.enum(["zh-t", "zh-s", "en"]).describe("Language: zh-t (Traditional Chinese), zh-s (Simplified Chinese), en (English)"),
       date_range: z.object({
-        from: z.number().positive().describe("Start unix timestamp"),
-        to: z.number().positive().describe("End unix timestamp"),
+        from: TimestampMs.describe("Start unix timestamp in MILLISECONDS (13-digit integer). NOT seconds."),
+        to: TimestampMs.describe("End unix timestamp in MILLISECONDS (13-digit integer). NOT seconds."),
       }).optional().describe("Required for adhoc tasks: time range for data collection"),
       search_query: searchQuerySchema.describe(
         "Search query configuration. Example query_layer with nested grouped keywords:\n" +

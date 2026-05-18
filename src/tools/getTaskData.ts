@@ -1,7 +1,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { LenxClient } from "../client.js";
-import { GetTaskDataResponse } from "../types.js";
+import { GetTaskDataResponse, TimestampMs } from "../types.js";
 
 export function registerGetTaskData(server: McpServer, client: LenxClient): void {
   server.tool(
@@ -9,10 +9,10 @@ export function registerGetTaskData(server: McpServer, client: LenxClient): void
     "Retrieve paginated social media post data for a specific task within a time range.",
     {
       task_id: z.coerce.number().int().positive().describe("Task ID"),
-      from: z.number().positive().describe("Start unix timestamp (inclusive)"),
-      to: z.number().positive().describe("End unix timestamp (inclusive)"),
+      from: TimestampMs.describe("Start unix timestamp in MILLISECONDS (13-digit integer), inclusive. NOT seconds."),
+      to: TimestampMs.describe("End unix timestamp in MILLISECONDS (13-digit integer), inclusive. NOT seconds."),
       size: z.number().positive().max(1000).describe("Number of posts per page (max: 1000)"),
-      search_after: z.number().optional().describe("Cursor for pagination: pass the last post's unix_timestamp to get the next page"),
+      search_after: TimestampMs.optional().describe("Cursor for pagination: pass the last post's unix_timestamp in MILLISECONDS (13-digit integer). NOT seconds."),
     },
     async ({ task_id, from, to, size, search_after }) => {
       try {
