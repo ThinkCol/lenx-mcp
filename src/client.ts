@@ -4,11 +4,13 @@ export class LenxClient {
   private baseUrl: string;
   private apiKey: string;
   private userId: string;
+  private version: string;
 
-  constructor(config: LenxConfig) {
+  constructor(config: LenxConfig, version: string) {
     this.baseUrl = config.baseUrl.replace(/\/$/, "");
     this.apiKey = config.apiKey;
     this.userId = config.userId;
+    this.version = version;
   }
 
   private async request<T>(
@@ -18,6 +20,8 @@ export class LenxClient {
   ): Promise<T> {
     const url = new URL(path, this.baseUrl);
     const headers: Record<string, string> = {
+      "User-Agent": "lenx-mcp",
+      "X-Lenx-MCP-Version": this.version,
       "x-api-key": this.apiKey,
       "x-user-id": this.userId,
       "Content-Type": "application/json",

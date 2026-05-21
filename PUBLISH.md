@@ -16,7 +16,7 @@ Run through every step before publishing:
 
 | Step | Command | What to look for |
 |------|---------|-----------------|
-| **Logged in?** | `yarn npm whoami` | Should print `fastaai`. If it errors, run `yarn npm login` (or set `NPM_TOKEN`). |
+| **Logged in?** | `npm whoami` | Should print `fastaai`. If it errors, run `npm login` (or set `NPM_TOKEN`). |
 | **Tests pass** | `yarn test` | Vitest suite. All green. |
 | **Clean build** | `yarn build` | TypeScript compiles, postbuild runs. Zero errors. |
 | **Inspect tarball** | `yarn pack && tar --list -f *.tgz` | Only `dist/`, `README.md`, and `package.json`. |
@@ -40,32 +40,34 @@ This package follows [semantic versioning](https://semver.org/):
 This is the **one correct way** to bump versions. Do not edit `package.json` manually.
 
 ```sh
-yarn version patch   # 0.0.1 → 0.0.2
-yarn version minor   # 0.0.1 → 0.1.0
-yarn version major   # 1.0.0 → 2.0.0
+yarn version --new-version 0.0.3   # patch
+yarn version --new-version 0.1.0   # minor
+yarn version --new-version 1.0.0   # major
 ```
+
+> **Yarn v2+ note:** If you upgrade to Yarn v2+ (Berry), the flags change to `yarn version patch`, `yarn version minor`, `yarn version major`. On Yarn v1 (1.22.22), use `--new-version` as shown above.
 
 ### What it does under the hood
 
 `yarn version` performs three actions automatically:
 1. Edits the `version` field in `package.json`
 2. Creates a git commit with the version as the message
-3. Creates a git tag named `v<version>` (e.g., `v0.0.2`)
+3. Creates a git tag named `v<version>` (e.g., `v0.0.3`)
 
 ### ⚠️ Important: `yarn version` vs `npm version`
 
 `yarn version` has a key difference from `npm version`:
 
 - By default, `yarn version` opens an **interactive editor** (like `git commit`) instead of doing a non-interactive bump.
-- Passing `--patch`, `--minor`, or `--major` flags as shown above is the standard way to do it non-interactively in modern Yarn (v2+). If you are on Yarn v1, these flags are not available — upgrade or use the workaround below.
+- Passing `--new-version` as shown above avoids the interactive editor on Yarn v1.
 - If you want to **bump the version without creating a git tag** (e.g., to tag manually or in CI), use:
   ```sh
-  yarn version --patch --no-git-tag-version
+  yarn version --new-version 0.0.3 --no-git-tag-version
   ```
 
 ### Git tag convention
 
-Tags use the `v` prefix: `v0.0.2`, `v1.2.3`. Push both the commit and tag together:
+Tags use the `v` prefix: `v0.0.3`, `v1.2.3`. Push both the commit and tag together:
 
 ```sh
 git push --follow-tags
@@ -87,7 +89,7 @@ git push --follow-tags
 Always preview before publishing:
 
 ```sh
-yarn npm publish --dry-run
+npm publish --dry-run
 ```
 
 This runs the full publish pipeline without actually sending anything to the registry.
@@ -95,23 +97,19 @@ This runs the full publish pipeline without actually sending anything to the reg
 ### Actual publish
 
 ```sh
-yarn npm publish
+npm publish
 ```
 
-- `yarn npm publish` automatically runs `yarn build` before packaging via the `prepublishOnly` lifecycle hook defined in `package.json`. You do not need to build separately.
-- Yarn prompts for a version interactively **unless** you pass `--new-version`:
-  ```sh
-  yarn npm publish --new-version 0.0.2
-  ```
+- `npm publish` automatically runs `yarn build` before packaging via the `prepublishOnly` lifecycle hook defined in `package.json`. You do not need to build separately.
 - If 2FA is enabled, npm prompts for a one-time password (OTP). Pass it inline for automation:
   ```sh
-  yarn npm publish --otp=123456
+  npm publish --otp=123456
   ```
 - Scoped packages default to private. `package.json` sets `"publishConfig": { "access": "public" }` so this works out of the box.
 
 ### Automation tokens
 
-For CI, use an npm automation token (set as `NPM_TOKEN` in repo secrets). Yarn respects the `NPM_TOKEN` environment variable automatically. Automation tokens bypass 2FA. Example in CI section below.
+For CI, use an npm automation token (set as `NPM_TOKEN` in repo secrets). npm respects the `NPM_TOKEN` environment variable. Automation tokens bypass 2FA. Example in CI section below.
 
 ---
 
@@ -135,12 +133,14 @@ jobs:
         with:
           node-version: 20
           registry-url: "https://registry.npmjs.org"
-      - run: yarn npm publish
+      - run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 ```
 
 This triggers on any tag matching `v*` (exactly what `yarn version` creates) and publishes using an npm automation token. Automation tokens bypass 2FA, so no `--otp` is needed.
+
+> **Yarn v2+ note:** If you upgrade CI to Yarn v2+, use `yarn npm publish` instead of `npm publish`.
 
 ---
 
@@ -171,18 +171,20 @@ Tags are aliases for version numbers. The `latest` tag is what `npx @fastaai/len
 
 ### Managing tags
 
-Yarn uses the `yarn npm tag` subcommand:
+npm uses the `npm dist-tag` subcommand:
 
 ```sh
-yarn npm tag list @fastaai/lenx-mcp                     # list all tags
-yarn npm tag add @fastaai/lenx-mcp@0.2.0-beta.1 beta    # set beta tag
-yarn npm tag remove @fastaai/lenx-mcp beta               # remove beta tag
+npm dist-tag ls @fastaai/lenx-mcp                     # list all tags
+npm dist-tag add @fastaai/lenx-mcp@0.2.0-beta.1 beta  # set beta tag
+npm dist-tag rm @fastaai/lenx-mcp beta                 # remove beta tag
 ```
 
-When you run `yarn npm publish`, the `latest` tag is updated automatically. Publish without affecting `latest` using `--tag`:
+> **Yarn v2+ note:** If you upgrade to Yarn v2+, the commands change to `yarn npm tag list`, `yarn npm tag add`, and `yarn npm tag remove`.
+
+When you run `npm publish`, the `latest` tag is updated automatically. Publish without affecting `latest` using `--tag`:
 
 ```sh
-yarn npm publish --tag beta
+npm publish --tag beta
 ```
 
 ---
@@ -191,10 +193,10 @@ yarn npm publish --tag beta
 
 | Error | Likely cause | Fix |
 |-------|-------------|-----|
-| `ENEEDAUTH` | Not logged in | `yarn npm login` (or set `NPM_TOKEN`) |
+| `ENEEDAUTH` | Not logged in | `npm login` (or set `NPM_TOKEN`) |
 | `E403` | Scope is private or package name taken | Check `publishConfig.access` is `"public"`. Verify the name isn't already owned on npm. |
-| `E404` | Package not found (install-side) | Double-check spelling. Run `yarn npm info @fastaai/lenx-mcp` to verify it exists. |
-| `EPUBLISHCONFLICT` | Version already published | Bump the version — `yarn version patch` and try again. |
+| `E404` | Not logged in or org doesn't exist | Run `npm whoami` to check. Run `npm login` to authenticate. |
+| `EPUBLISHCONFLICT` | Version already published | Bump the version — `yarn version --new-version X.Y.Z` and try again. |
 | `dist/` missing from tarball | `files` field misconfigured | Run `yarn pack` to check. Verify `files` in `package.json` includes `"dist/"`. |
 
 ### Unpublishing
@@ -202,14 +204,18 @@ yarn npm publish --tag beta
 You can unpublish within **72 hours** of publishing:
 
 ```sh
-yarn npm unpublish @fastaai/lenx-mcp@0.1.0
+npm unpublish @fastaai/lenx-mcp@0.1.0
 ```
+
+> **Yarn v2+ note:** Use `yarn npm unpublish` instead.
 
 After 72 hours, deprecate instead:
 
 ```sh
-yarn npm deprecate @fastaai/lenx-mcp@0.1.0 "Critical bug — upgrade to 0.2.0"
+npm deprecate @fastaai/lenx-mcp@0.1.0 "Critical bug — upgrade to 0.2.0"
 ```
+
+> **Yarn v2+ note:** Use `yarn npm deprecate` instead.
 
 ### Verifying tarball contents
 
@@ -234,12 +240,102 @@ package/package.json
 
 ---
 
-## 8. Quick Reference Cheatsheet
+## 8. Step-by-Step Walkthrough
+
+Three complete end-to-end sequences. Copy-paste these in order and you're done.
+
+### Patch (e.g. 0.0.2 → 0.0.3)
+
+```sh
+# 1. Verify auth
+npm whoami
+
+# 2. Run tests
+yarn test
+
+# 3. Build
+yarn build
+
+# 4. Preview tarball
+yarn pack && tar --list -f *.tgz
+
+# 5. Bump version (creates git commit + tag)
+yarn version --new-version 0.0.3
+
+# 6. Dry-run publish
+npm publish --dry-run
+
+# 7. Publish
+npm publish
+
+# 8. Push commit and tag
+git push --follow-tags
+```
+
+### Minor (e.g. 0.0.2 → 0.1.0)
+
+```sh
+# 1. Verify auth
+npm whoami
+
+# 2. Run tests
+yarn test
+
+# 3. Build
+yarn build
+
+# 4. Preview tarball
+yarn pack && tar --list -f *.tgz
+
+# 5. Bump version (creates git commit + tag)
+yarn version --new-version 0.1.0
+
+# 6. Dry-run publish
+npm publish --dry-run
+
+# 7. Publish
+npm publish
+
+# 8. Push commit and tag
+git push --follow-tags
+```
+
+### Major (e.g. 0.0.2 → 1.0.0)
+
+```sh
+# 1. Verify auth
+npm whoami
+
+# 2. Run tests
+yarn test
+
+# 3. Build
+yarn build
+
+# 4. Preview tarball
+yarn pack && tar --list -f *.tgz
+
+# 5. Bump version (creates git commit + tag)
+yarn version --new-version 1.0.0
+
+# 6. Dry-run publish
+npm publish --dry-run
+
+# 7. Publish
+npm publish
+
+# 8. Push commit and tag
+git push --follow-tags
+```
+
+---
+
+## 9. Quick Reference Cheatsheet
 
 ```sh
 # ── Login & Auth ────────────────────────────────────────
-yarn npm whoami
-yarn npm login
+npm whoami
+npm login
 
 # ── Verify ──────────────────────────────────────────────
 yarn test
@@ -247,24 +343,23 @@ yarn build
 yarn pack && tar --list -f *.tgz
 
 # ── Version bump (creates git tag automatically) ───────
-yarn version patch   # 0.0.1 → 0.0.2
-yarn version minor   # 0.0.1 → 0.1.0
-yarn version major   # 0.0.1 → 1.0.0
+yarn version --new-version 0.0.3   # patch
+yarn version --new-version 0.1.0   # minor
+yarn version --new-version 1.0.0   # major
 # Or without git tag:
-# yarn version --patch --no-git-tag-version
+# yarn version --new-version 0.0.3 --no-git-tag-version
 git push --follow-tags
 
 # ── Publish ─────────────────────────────────────────────
-yarn npm publish --dry-run                    # preview only
-yarn npm publish --new-version 0.0.2          # specify version
-yarn npm publish                              # interactive version prompt, OTP
-yarn npm publish --otp=123456                 # inline OTP
-yarn npm publish --tag beta                   # publish as beta (not latest)
+npm publish --dry-run                    # preview only
+npm publish                              # (runs build via prepublishOnly)
+npm publish --otp=123456                 # inline OTP
+npm publish --tag beta                   # publish as beta (not latest)
 
 # ── dist-tags ───────────────────────────────────────────
-yarn npm tag list @fastaai/lenx-mcp
-yarn npm tag add @fastaai/lenx-mcp@0.2.0-beta.1 beta
-yarn npm tag remove @fastaai/lenx-mcp beta
+npm dist-tag ls @fastaai/lenx-mcp
+npm dist-tag add @fastaai/lenx-mcp@0.2.0-beta.1 beta
+npm dist-tag rm @fastaai/lenx-mcp beta
 
 # ── npx usage (users) ───────────────────────────────────
 npx @fastaai/lenx-mcp
@@ -272,7 +367,7 @@ npx @fastaai/lenx-mcp@0.1.0
 npx @fastaai/lenx-mcp@latest
 
 # ── Troubleshooting ─────────────────────────────────────
-yarn npm info @fastaai/lenx-mcp                # check latest version
-yarn npm unpublish @fastaai/lenx-mcp@0.1.0     # only within 72h
-yarn npm deprecate @fastaai/lenx-mcp@0.1.0 msg # after 72h
+npm view @fastaai/lenx-mcp                 # check latest version
+npm unpublish @fastaai/lenx-mcp@0.1.0      # only within 72h
+npm deprecate @fastaai/lenx-mcp@0.1.0 msg  # after 72h
 ```

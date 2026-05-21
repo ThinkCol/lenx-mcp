@@ -9,14 +9,16 @@ describe("LenxClient", () => {
     vi.restoreAllMocks();
   });
 
-  it("sends x-api-key and x-user-id headers on every request", async () => {
+  it("sends headers on every request", async () => {
     const mockFetch = vi.spyOn(globalThis, "fetch").mockResolvedValue(
       new Response(JSON.stringify({ data: [] }), { status: 200 })
     );
-    const client = new LenxClient(config);
+    const client = new LenxClient(config, "0.0.1");
     await client.get("/api/v1/tasks");
     const call = mockFetch.mock.calls[0];
     const headers = (call[1] as RequestInit).headers as Record<string, string>;
+    expect(headers["User-Agent"]).toBe("lenx-mcp");
+    expect(headers["X-Lenx-MCP-Version"]).toBe("0.0.1");
     expect(headers["x-api-key"]).toBe("test-key");
     expect(headers["x-user-id"]).toBe("test-user");
   });
@@ -25,7 +27,7 @@ describe("LenxClient", () => {
     const mockFetch = vi.spyOn(globalThis, "fetch").mockResolvedValue(
       new Response(JSON.stringify({ data: [] }), { status: 200 })
     );
-    const client = new LenxClient(config);
+    const client = new LenxClient(config, "0.0.1");
     await client.get("/api/v1/tasks");
     const signal = (mockFetch.mock.calls[0][1] as RequestInit).signal;
     expect(signal).toBeInstanceOf(AbortSignal);
@@ -35,7 +37,7 @@ describe("LenxClient", () => {
     vi.spyOn(globalThis, "fetch").mockResolvedValue(
       new Response(JSON.stringify({ message: "Invalid parameters" }), { status: 400 })
     );
-    const client = new LenxClient(config);
+    const client = new LenxClient(config, "0.0.1");
     await expect(client.get("/api/v1/tasks")).rejects.toThrow("Invalid parameters");
   });
 
@@ -43,13 +45,13 @@ describe("LenxClient", () => {
     vi.spyOn(globalThis, "fetch").mockResolvedValue(
       new Response(JSON.stringify({ message: "Internal error" }), { status: 500 })
     );
-    const client = new LenxClient(config);
+    const client = new LenxClient(config, "0.0.1");
     await expect(client.get("/api/v1/tasks")).rejects.toThrow("Server error: 500");
   });
 
   it("throws Network error on fetch failure", async () => {
     vi.spyOn(globalThis, "fetch").mockRejectedValue(new Error("ECONNREFUSED"));
-    const client = new LenxClient(config);
+    const client = new LenxClient(config, "0.0.1");
     await expect(client.get("/api/v1/tasks")).rejects.toThrow("Network error: ECONNREFUSED");
   });
 
@@ -57,7 +59,7 @@ describe("LenxClient", () => {
     const mockFetch = vi.spyOn(globalThis, "fetch").mockResolvedValue(
       new Response(JSON.stringify({ data: {} }), { status: 201 })
     );
-    const client = new LenxClient(config);
+    const client = new LenxClient(config, "0.0.1");
     const body = { task_name: "test" };
     await client.post("/api/v1/tasks", body);
     const call = mockFetch.mock.calls[0];
@@ -68,7 +70,7 @@ describe("LenxClient", () => {
     const mockFetch = vi.spyOn(globalThis, "fetch").mockResolvedValue(
       new Response(JSON.stringify({ data: {} }), { status: 200 })
     );
-    const client = new LenxClient(config);
+    const client = new LenxClient(config, "0.0.1");
     const body = { task_name: "updated" };
     await client.patch("/api/v1/tasks/1", body);
     const call = mockFetch.mock.calls[0];
@@ -79,7 +81,7 @@ describe("LenxClient", () => {
     vi.spyOn(globalThis, "fetch").mockResolvedValue(
       new Response(JSON.stringify({ data: { task_id: 1, deleted: true } }), { status: 200 })
     );
-    const client = new LenxClient(config);
+    const client = new LenxClient(config, "0.0.1");
     const result = await client.delete<{ data: { task_id: number; deleted: boolean } }>("/api/v1/tasks/1");
     expect(result.data.deleted).toBe(true);
   });
@@ -88,7 +90,7 @@ describe("LenxClient", () => {
     vi.spyOn(globalThis, "fetch").mockResolvedValue(
       new Response(null, { status: 204, headers: { "content-length": "0" } })
     );
-    const client = new LenxClient(config);
+    const client = new LenxClient(config, "0.0.1");
     const result = await client.delete<null>("/api/v1/tasks/1");
     expect(result).toBeNull();
   });
@@ -97,7 +99,7 @@ describe("LenxClient", () => {
     vi.spyOn(globalThis, "fetch").mockResolvedValue(
       new Response(JSON.stringify({ error: "Forbidden" }), { status: 403 })
     );
-    const client = new LenxClient(config);
+    const client = new LenxClient(config, "0.0.1");
     await expect(client.get("/api/v1/tasks")).rejects.toThrow("Forbidden");
   });
 
@@ -105,7 +107,7 @@ describe("LenxClient", () => {
     vi.spyOn(globalThis, "fetch").mockResolvedValue(
       new Response("not json", { status: 400 })
     );
-    const client = new LenxClient(config);
+    const client = new LenxClient(config, "0.0.1");
     await expect(client.get("/api/v1/tasks")).rejects.toThrow("HTTP 400");
   });
 });
