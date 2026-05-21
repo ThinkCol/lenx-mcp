@@ -15,7 +15,7 @@ const require = createRequire(import.meta.url);
 const { version } = require("../package.json");
 
 export async function createAndRunServer(config: LenxConfig): Promise<void> {
-  const client = new LenxClient(config);
+  const client = new LenxClient(config, version);
 
   const server = new McpServer(
     { name: "lenx-mcp", version },
