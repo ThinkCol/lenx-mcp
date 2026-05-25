@@ -29,6 +29,9 @@ export function registerUpdateTask(server: McpServer, client: LenxClient): void 
           "Partial search query update. Provide only the fields to change. Example:\n" +
           '{"query_layer": [{"in": ["new_keyword"], "ex": []}]}'
         ),
+        prompts: z.record(z.string().min(1).max(5000).nullable()).optional().describe(
+          "Per-task AI prompts for sentiment, irrelevancy, etc. Values are strings (1-5000 chars) or null."
+        ),
       },
       annotations: {
         readOnlyHint: false,
@@ -41,6 +44,7 @@ export function registerUpdateTask(server: McpServer, client: LenxClient): void 
         const body: Record<string, unknown> = {};
         if (params.task_name !== undefined) body.task_name = params.task_name;
         if (params.search_query !== undefined) body.search_query = params.search_query;
+        if (params.prompts !== undefined) body.prompts = params.prompts;
         const result = await client.patch<UpdateTaskResponse>(`/api/v1/tasks/${params.task_id}`, body);
         return { content: [{ type: "text" as const, text: JSON.stringify(result) }] };
       } catch (err) {

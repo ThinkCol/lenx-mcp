@@ -8,13 +8,10 @@ const queryLayerItemSchema = z.object({
   ex: z.array(z.union([z.string(), z.array(z.string())])),
 });
 
-const searchQuerySchema = z.object({
-  query_layer: z.array(queryLayerItemSchema).nullable().optional(),
-  region: z.string().nullable().optional(),
-  list_medium: z.array(z.string()).optional(),
-  list_author_id: z.array(z.string()).optional(),
-  lang_abbr: z.string().nullable().optional(),
-  exclude_channel_links: z.array(z.string()).optional(),
+export const createSearchQuerySchema = z.object({
+  query_layer: z.array(queryLayerItemSchema),
+  region: z.enum(["Hong Kong", "China", "Taiwan", "USA"]).optional(),
+  list_medium: z.array(z.enum(["Facebook", "Instagram", "Social", "News", "Forum", "Blog", "Videos"])).optional(),
 });
 
 export function registerCreateTask(server: McpServer, client: LenxClient): void {
@@ -30,7 +27,7 @@ export function registerCreateTask(server: McpServer, client: LenxClient): void 
           from: TimestampMs.describe("Start unix timestamp in MILLISECONDS (13-digit integer). NOT seconds."),
           to: TimestampMs.describe("End unix timestamp in MILLISECONDS (13-digit integer). NOT seconds."),
         }).optional().describe("Required for adhoc tasks: time range for data collection"),
-        search_query: searchQuerySchema.describe(
+        search_query: createSearchQuerySchema.describe(
           "Search query configuration. Example query_layer with nested grouped keywords:\n" +
           '[{"in": ["brand_name", "product_name"], "ex": ["competitor_name"]}]\n' +
           "Nested OR-group form:\n" +

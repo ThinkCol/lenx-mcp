@@ -24,6 +24,7 @@ interface UpdateTaskArgs {
     lang_abbr?: string | null;
     exclude_channel_links?: string[];
   };
+  prompts?: Record<string, string | null>;
 }
 
 describe("lenx_update_task", () => {
@@ -59,6 +60,38 @@ describe("lenx_update_task", () => {
 
     await handler({ task_id: "42" as unknown as number, task_name: "Renamed" }, { signal: new AbortController().signal });
     expect(patchMock).toHaveBeenCalledWith("/api/v1/tasks/42", { task_name: "Renamed" });
+  });
+
+  it("includes prompts in PATCH body when provided", async () => {
+    const patchMock = vi.spyOn(LenxClient.prototype, "patch").mockResolvedValue({ data: { task_id: 42, updated: true } });
+    const server = new McpServer({ name: "test", version: "0.0.0" });
+    const client = new LenxClient(config);
+    registerUpdateTask(server, client);
+
+    const handler = getToolHandler(server, "lenx_update_task") as (
+      args: UpdateTaskArgs,
+      extra: { signal: AbortSignal }
+    ) => Promise<{ content: { type: string; text: string }[]; isError?: boolean }>;
+
+    const prompts = { sentiment: "Analyze this text for sentiment", irrelevancy: null };
+    await handler({ task_id: 42, task_name: "Updated", prompts }, { signal: new AbortController().signal });
+    expect(patchMock).toHaveBeenCalledWith("/api/v1/tasks/42", { task_name: "Updated", prompts });
+  });
+
+  it("allows null values within prompts", async () => {
+    const patchMock = vi.spyOn(LenxClient.prototype, "patch").mockResolvedValue({ data: { task_id: 42, updated: true } });
+    const server = new McpServer({ name: "test", version: "0.0.0" });
+    const client = new LenxClient(config);
+    registerUpdateTask(server, client);
+
+    const handler = getToolHandler(server, "lenx_update_task") as (
+      args: UpdateTaskArgs,
+      extra: { signal: AbortSignal }
+    ) => Promise<{ content: { type: string; text: string }[]; isError?: boolean }>;
+
+    const prompts = { irrelevancy: null };
+    await handler({ task_id: 1, prompts }, { signal: new AbortController().signal });
+    expect(patchMock).toHaveBeenCalledWith("/api/v1/tasks/1", { prompts });
   });
 
   it("returns isError on failure", async () => {

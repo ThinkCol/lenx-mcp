@@ -19,7 +19,7 @@ export function registerExportTaskData(server: McpServer, client: LenxClient): v
     {
       description: "Request a CSV or XLSX export of task post data. Results are sent to the specified email address.",
       inputSchema: {
-        task_ids: z.array(z.coerce.number().int().positive()).min(1).describe("Array of task IDs to export (strings are auto-converted to numbers)"),
+        task_ids: z.array(z.coerce.number().int().positive()).optional().describe("Array of task IDs to export (strings are auto-converted to numbers)"),
         unix_start: TimestampMs.describe("Start of export time range in MILLISECONDS (13-digit integer). NOT seconds."),
         unix_end: TimestampMs.describe("End of export time range in MILLISECONDS (13-digit integer). NOT seconds."),
         columns: z.array(z.enum(exportColumns)).min(1).describe("Columns to include in the export file"),

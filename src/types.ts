@@ -74,6 +74,7 @@ export interface Task {
   language: string;
   date_range?: DateRange;
   search_query?: SearchQuery;
+  prompts?: Record<string, string | null>;
   created_at?: string;
   updated_at?: string;
 }
@@ -92,17 +93,24 @@ export interface ErrorResponse {
 }
 
 /* ── Request Bodies ── */
+export interface CreateSearchQuery {
+  query_layer: QueryLayerItem[];
+  region?: "Hong Kong" | "China" | "Taiwan" | "USA";
+  list_medium?: ("Facebook" | "Instagram" | "Social" | "News" | "Forum" | "Blog" | "Videos")[];
+}
+
 export interface CreateTaskRequest {
   task_type: "live" | "adhoc";
   task_name: string;
   language: "zh-t" | "zh-s" | "en";
   date_range?: DateRange;
-  search_query: SearchQuery;
+  search_query: CreateSearchQuery;
 }
 
 export interface UpdateTaskRequest {
   task_name?: string;
   search_query?: SearchQuery;
+  prompts?: Record<string, string | null>;
 }
 
 export interface ExportTaskRequest {

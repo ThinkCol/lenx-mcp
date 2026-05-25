@@ -14,7 +14,7 @@ function getToolHandler(server: McpServer, name: string) {
 }
 
 type ExportTaskDataArgs = {
-  task_ids: number[];
+  task_ids?: number[];
   unix_start: number;
   unix_end: number;
   columns: string[];
@@ -70,6 +70,27 @@ describe("lenx_export_task_data", () => {
 
     const sentBody = postMock.mock.calls[0][1] as any;
     expect(sentBody.task_ids).toEqual([1, 2, 3]);
+  });
+
+  it("accepts export request without task_ids", async () => {
+    const postMock = vi.spyOn(LenxClient.prototype, "post").mockResolvedValue({ result: "success" as const });
+    const server = new McpServer({ name: "test", version: "0.0.0" });
+    const client = new LenxClient(config);
+    registerExportTaskData(server, client);
+
+    const handler = getToolHandler(server, "lenx_export_task_data") as (args: ExportTaskDataArgs, extra: { signal: AbortSignal }) => HandlerResult;
+    const result = await handler({
+      unix_start: 1740096000000,
+      unix_end: 1740787200000,
+      columns: ["medium", "site"],
+      file_format: "csv",
+      email: "user@example.com",
+    }, { signal: new AbortController().signal });
+
+    const sentBody = postMock.mock.calls[0][1] as any;
+    expect(sentBody.task_ids).toBeUndefined();
+    expect(result.isError).toBeUndefined();
+    expect(result.content[0].text).toBe(JSON.stringify({ result: "success" }));
   });
 
   it("returns isError on failure", async () => {

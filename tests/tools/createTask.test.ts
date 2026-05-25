@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, vi } from "vitest";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { LenxClient } from "../../src/client.js";
 import { LenxConfig } from "../../src/config.js";
-import { registerCreateTask } from "../../src/tools/createTask.js";
+import { registerCreateTask, createSearchQuerySchema } from "../../src/tools/createTask.js";
 
 const config: LenxConfig = { apiKey: "k", userId: "u", baseUrl: "https://api.test.com" };
 
@@ -19,12 +19,9 @@ interface CreateTaskArgs {
   language: "zh-t" | "zh-s" | "en";
   date_range?: { from: number; to: number };
   search_query: {
-    query_layer?: { in: (string | string[])[]; ex: (string | string[])[] }[] | null;
-    region?: string | null;
-    list_medium?: string[];
-    list_author_id?: string[];
-    lang_abbr?: string | null;
-    exclude_channel_links?: string[];
+    query_layer: { in: (string | string[])[]; ex: (string | string[])[] }[];
+    region?: "Hong Kong" | "China" | "Taiwan" | "USA";
+    list_medium?: ("Facebook" | "Instagram" | "Social" | "News" | "Forum" | "Blog" | "Videos")[];
   };
 }
 
@@ -56,6 +53,34 @@ describe("lenx_create_task", () => {
     }, { signal: new AbortController().signal });
     expect(result.isError).toBeUndefined();
     expect(result.content[0].text).toBe(JSON.stringify(mockResponse));
+  });
+
+  it("rejects missing query_layer", () => {
+    const result = createSearchQuerySchema.safeParse({ region: "USA" });
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues.some((i) => i.path.includes("query_layer"))).toBe(true);
+    }
+  });
+
+  it("rejects invalid region value", () => {
+    const result = createSearchQuerySchema.safeParse({
+      query_layer: [{ in: ["kw"], ex: [] }], region: "Canada",
+    });
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues.some((i) => i.path.includes("region"))).toBe(true);
+    }
+  });
+
+  it("rejects invalid list_medium value", () => {
+    const result = createSearchQuerySchema.safeParse({
+      query_layer: [{ in: ["kw"], ex: [] }], list_medium: ["TikTok"],
+    });
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues.some((i) => i.path.includes("list_medium"))).toBe(true);
+    }
   });
 
   it("returns isError on failure", async () => {

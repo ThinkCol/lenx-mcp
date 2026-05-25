@@ -17,7 +17,7 @@ describe("lenx_get_task", () => {
   beforeEach(() => { vi.restoreAllMocks(); });
 
   it("returns task details on success", async () => {
-    const mockData = { data: { task_id: 42, task_name: "Monitor", task_type: "live", language: "en", search_query: { query_layer: [{ in: ["keyword"], ex: [] }] } } };
+    const mockData = { data: { task_id: 42, task_name: "Monitor", task_type: "live", language: "en", search_query: { query_layer: [{ in: ["keyword"], ex: [] }] }, prompts: { sentiment: "Analyze sentiment...", irrelevancy: null } } };
     vi.spyOn(LenxClient.prototype, "get").mockResolvedValue(mockData);
     const server = new McpServer({ name: "test", version: "0.0.0" });
     const client = new LenxClient(config);
